@@ -14,13 +14,8 @@
     </button>
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav">
-        <li class="nav-item active">
-          <a class="nav-link" href="/">Home
-            <span class="sr-only">(current)</span></a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link" href="/about">About</a>
-        </li>
+        
+        
       </ul>
       <ul class="navbar-nav ml-auto">
         {{#if user}}
@@ -37,7 +32,7 @@
                     aria-haspopup="true"
                     aria-expanded="false"
                   >
-                    {{this.name}}
+                    Menú
                   </a>
                   <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                     <a class="dropdown-item" href="/notes">Todos los Eventos</a>
@@ -57,7 +52,7 @@
                     aria-haspopup="true"
                     aria-expanded="false"
                   >
-                    Notes
+                    Menú
                   </a>
                   <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                     <a class="dropdown-item" href="/notes">Eventos inscritos</a>
@@ -71,10 +66,10 @@
           {{/each}}
         {{else}}
           <li class="nav-item">
-            <a class="nav-link" href="/users/signin">Login</a>
+            <a class="nav-link" href="/users/signin">Iniciar Sesión</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/users/signup">Register</a>
+            <a class="nav-link" href="/users/signup">Registrarse</a>
           </li>
         {{/if}}
       </ul>

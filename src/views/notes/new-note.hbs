@@ -1,0 +1,153 @@
+<div class="col-md-4 mx-auto">
+  <div class="card text-center">
+    <div class="card-header">
+      <h3>Nuevo Evento</h3>
+    </div>
+    <div class="card-body">
+      <form action="/notes/new-note" method="POST">
+        <div class="form-group">
+          <input
+            type="text"
+            name="title"
+            class="form-control"
+            placeholder="Nombre del evento"
+            autofocus
+          />
+        </div>
+        <div class="form-group">
+          <textarea
+            name="description"
+            class="form-control"
+            placeholder="Descripción"
+          ></textarea>
+        </div>
+        <div class="form-group">
+          <label for="exhibitor" class="m-0">Expositores</label>
+          <select
+            class="form-control mb-2 h-auto"
+            id="exhibitor"
+            name="exhibitor"
+          >
+            {{! <option>1</option> }}
+          </select>
+          <button class="btn btn-secondary btn-sm" type="button" onclick="addExpositors()">
+            Agregar expositor
+          </button>
+        </div>
+        <div id="listExhibitors" class="list-group mb-3"></div>
+        <div class="form-group">
+          <input id="exts" type="text" name="exhibitors" class="form-control d-none" />
+        </div>
+        <script>
+          const exhibitors = []
+          const optionsExhibitors = async () => {
+            let res = await fetch('http://localhost:4000/notes/exhibitors')
+            res = await res.json()
+            let options = ""
+            res.data.forEach(e => {
+              options += `<option value="${e._id}" id="${e._id}">${e.name}: ${e.dni}</option> `
+            })
+            document.getElementById('exhibitor').innerHTML = options
+          }
+          const paintExhibitors = () => {
+            let input = ""
+            let list = ""
+            exhibitors.forEach(e => {
+              input += e.id + ",";
+              list += `<button onclick="deleteExpositors('${e.id}')" 
+                type="button" class="list-group-item list-group-item-action">${e.name}</button> `
+            })
+            input = input.substring(0, input.length - 1);
+            console.log(input)
+            document.getElementById('exts').value = input
+            document.getElementById('listExhibitors').innerHTML = list
+          } 
+          const deleteExpositors = (id) => {
+            console.log(id)
+            let index = -1;
+            exhibitors.forEach((e, i) => {
+              if(e.id === id) {
+                index = i;
+                return;
+              }
+            })
+            exhibitors.splice(index, 1);
+            paintExhibitors()
+          }
+          const addExpositors = () => {
+            const element = {}
+            element.id = document.getElementById('exhibitor').value
+            element.name = document.getElementById(element.id).innerHTML
+            if(exhibitors.find(e => {
+              return e.id === element.id
+            }))
+              return;
+            exhibitors.push(element)
+            paintExhibitors()
+          }
+          optionsExhibitors();
+        </script>
+        <div class="form-group">
+          <input
+            type="text"
+            name="date"
+            class="form-control"
+            placeholder="Fecha: dd/mm/aaaa"
+          />
+        </div>
+        <div class="form-group">
+          <input
+            type="text"
+            name="schedule"
+            class="form-control"
+            placeholder="Hora: hh:mm"
+          />
+        </div>
+        <div class="form-group">
+          <input
+            type="text"
+            name="link"
+            class="form-control"
+            placeholder="Meet: meet.google.com/..."
+          />
+        </div>
+        <div class="form-group">
+          <button class="btn btn-primary btn-block" type="submit">
+            Guardar Evento
+          </button>
+        </div>
+      </form>
+
+      <div class="dropdown-divider"></div>
+      <form
+        action="/notes/new-exhibitor"
+        method="POST"
+        style="border: 1px solid black;"
+        class="p-3"
+      >
+        <h4>Nuevo Expositor</h4>
+        <div class="form-group">
+          <input
+            type="number"
+            name="dni"
+            class="form-control"
+            placeholder="DNI"
+          />
+        </div>
+        <div class="form-group">
+          <input
+            type="text"
+            name="name"
+            class="form-control"
+            placeholder="Nombre del Expositor"
+          />
+        </div>
+        <div class="form-group">
+          <button class="btn btn-secondary btn-block" type="submit">
+            Agregar Expositor
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

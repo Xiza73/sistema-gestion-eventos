@@ -1,5 +1,8 @@
+import Assistance from "../models/Assistance";
 import Exhibitor from "../models/Exhibitor";
 import Note from "../models/Note";
+import User from "../models/User";
+import configurations from "../config";
 
 export const renderNoteForm = (req, res) => {
   res.render("notes/new-note");
@@ -23,7 +26,7 @@ export const createNewNote = async (req, res) => {
     });
   } else {
     try {
-      const ex = exhibitors.split(",")
+      const ex = exhibitors.split(",");
       const newNote = new Note({
         title,
         description,
@@ -32,7 +35,6 @@ export const createNewNote = async (req, res) => {
         schedule,
         link,
       });
-      console.log("Create note");
       newNote
         .save()
         .then(function (_) {
@@ -42,8 +44,6 @@ export const createNewNote = async (req, res) => {
         .catch(function (error) {
           console.log(error);
         });
-      console.log("save");
-      console.log("redirected");
     } catch (error) {
       req.flash("error_msg", "Error al crear Evento");
     }
@@ -93,12 +93,57 @@ export const getExhibitors = async (req, res) => {
 };
 
 export const renderNotes = async (req, res) => {
+  const user = await User.findOne({
+    email: configurations.localStorage.getItem("email"),
+  });
+  if (user.role === "admin") {
+    const notes = await Note.find()
+      .populate("exhibitors")
+      .populate({
+        path: "assistance",
+        populate: "user",
+      })
+      .sort({ date: "desc" })
+      .lean();
+    res.render("notes/all-notes", { notes });
+    return;
+  }
   const notes = await Note.find()
     .populate("exhibitors")
+    .populate({
+      path: "assistance",
+      populate: "user",
+    })
     .sort({ date: "desc" })
     .lean();
-  console.log(notes)
-  res.render("notes/all-notes", { notes });
+  let assistances = [];
+  notes.forEach((note) => {
+    let assistance = false;
+    if (!note.assistance) {
+      assistance = true;
+    } else {
+      if (!note.assistance.find((e) => e.user.email === user.email)) {
+        assistance = true;
+      }
+    }
+    note.assist = assistance;
+  });
+  res.render("notes/all-events", { notes, user, assistances });
+};
+
+export const renderEvents = async (req, res) => {
+  const notes = await Note.find()
+    .populate("exhibitors")
+    .populate({
+      path: "assistance",
+      populate: "user",
+    })
+    .sort({ date: "desc" })
+    .lean();
+  const user = await User.findOne({
+    email: configurations.localStorage.getItem("email"),
+  });
+  res.render("notes/all-events", { notes, user });
 };
 
 export const renderEditForm = async (req, res) => {
@@ -121,4 +166,74 @@ export const deleteNote = async (req, res) => {
   await Note.findByIdAndDelete(req.params.id);
   req.flash("success_msg", "Note Deleted Successfully");
   res.redirect("/notes");
+};
+
+export const statusEvent = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const note = await Note.findById(id);
+    if (note.status === "PENDIENTE") {
+      await Note.findByIdAndUpdate(id, { status: "EN CURSO" });
+    } else if (note.status === "EN CURSO") {
+      await Note.findByIdAndUpdate(id, { status: "TERMINADO" });
+    }
+    req.flash("success_msg", "Evento actualizado!");
+    res.redirect("/notes");
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+export const assistanceUser = async (req, res) => {
+  try {
+    const id = req.params.id;
+    const asis = await Assistance.findById(id)
+    await Assistance.findByIdAndUpdate(id, { status: !asis.status }) 
+    req.flash("success_msg", "Marcado");
+    res.redirect("/notes");   
+  } catch (error) {
+    console.log(error)
+  }
+}
+
+export const assistEvent = async (req, res) => {
+  try {
+    const email = configurations.localStorage.getItem("email");
+    const user = await User.findOne({ email });
+    const newAssistance = new Assistance({ user });
+    await newAssistance.save();
+    const note = await Note.findById(req.params.id).populate({
+      path: "assistance",
+      populate: "user",
+    });
+    let assistance = [];
+    if (note.assistance) assistance = note.assistance;
+    if (!assistance.find((e) => e.user.email === user.email))
+      assistance.push(newAssistance);
+    else {
+      let index = -1;
+      let deleteAssistance;
+      assistance.forEach((e, i) => {
+        if (e.user.email === user.email) {
+          index = i;
+          deleteAssistance = e._id;
+          return;
+        }
+      });
+      if (index !== -1) {
+        assistance.splice(index, 1);
+        try {
+          await Assistance.findByIdAndDelete(deleteAssistance);
+        } catch (error) {
+          console.log(error);
+        }
+      }
+    }
+    await Note.findOneAndUpdate({ _id: req.params.id }, { assistance });
+
+    req.flash("success_msg", "Evento actualizado!");
+    res.redirect("/notes");
+  } catch (error) {
+    console.log(error);
+  }
 };

@@ -1,5 +1,6 @@
 import User from "../models/User";
 import passport from "passport";
+import configurations from '../config'
 
 export const renderSignUpForm = (req, res) => res.render("users/signup");
 
@@ -46,6 +47,7 @@ export const signin = passport.authenticate("local", {
 });
 
 export const logout = (req, res) => {
+  configurations.localStorage.removeItem("email");
   req.logout();
   req.flash("success_msg", "You are logged out now.");
   res.redirect("/users/signin");

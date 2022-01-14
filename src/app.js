@@ -38,6 +38,12 @@ app.engine(
         }
         return options.inverse(this);
       },
+      setVar: function (v1, v2, options) {
+        if (!options.data.root) {
+          options.data.root = {};
+        }
+        options.data.root[v1] = v2;
+      },
     },
   })
 );

@@ -7,6 +7,9 @@ import {
   renderNotes,
   renderEditForm,
   updateNote,
+  statusEvent,
+  assistEvent,
+  assistanceUser,
   deleteNote,
 } from "../controllers/notes.controller";
 import { isAuthenticated } from "../helpers/auth";
@@ -27,6 +30,9 @@ router.get("/notes/exhibitors", isAuthenticated, getExhibitors);
 router.get("/notes/edit/:id", isAuthenticated, renderEditForm);
 
 router.put("/notes/edit-note/:id", isAuthenticated, updateNote);
+router.put("/notes/edit-event/:id", isAuthenticated, assistEvent);
+router.put("/notes/status/:id", isAuthenticated, statusEvent);
+router.put("/notes/assistance/:id", isAuthenticated, assistanceUser);
 
 // Delete Notes
 router.delete("/notes/delete/:id", isAuthenticated, deleteNote);

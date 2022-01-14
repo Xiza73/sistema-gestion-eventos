@@ -1,3 +1,4 @@
+import configurations from "../config";
 import passport from "passport";
 import { Strategy as LocalStrategy } from "passport-local";
 
@@ -10,7 +11,7 @@ passport.use(
     },
     async (email, password, done) => {
       // Match Email's User
-      const user = await User.findOne({ email: email });
+      const user = await User.findOne({ email });
 
       if (!user) {
         return done(null, false, { message: "Not User found." });
@@ -18,6 +19,7 @@ passport.use(
         // Match Password's User
         const match = await user.matchPassword(password);
         if (match) {
+          configurations.localStorage.setItem("email", email);
           return done(null, user);
         } else {
           return done(null, false, { message: "Incorrect Password." });

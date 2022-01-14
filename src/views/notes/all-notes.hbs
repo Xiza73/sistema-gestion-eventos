@@ -4,22 +4,70 @@
     <div class="card">
       <div class="card-body">
         <h4 class="card-title d-flex justify-content-between align-items-center">
-          {{ title }}
+          {{title}}
         </h4>
-        <p><b>Descripción:</b> {{ description }} </p>
-        <p><b>Fecha:</b> {{ date }} </p>
-        <p><b>Hora:</b> {{ schedule }} </p>
+        <p><b>ESTADO:</b> {{status}} </p>
+        <p><b>Descripción:</b> {{description}} </p>
+        <p><b>Fecha:</b> {{date}} </p>
+        <p><b>Hora:</b> {{schedule}} </p>
         <p><b>Expositores:</b></p>
         <ul class="list-group mb-3">
           {{#each exhibitors}}
-            <li class="list-group-item">{{this.name}}: {{this.dni}}</li>
+          <li class="list-group-item">{{this.name}}: {{this.dni}}</li>
           {{/each}}
-        </ul> 
-        <p><b>Link:</b> {{ link }} </p>
+        </ul>
+        {{#eq status "PENDIENTE"}}
+        <p><b>Participantes:</b></p>
+        <ul class="list-group mb-3">
+          {{#each assistance}}
+          <li class="list-group-item">{{this.user.name}}:
+            {{this.user.email}}</li>
+          {{/each}}
+        </ul>
+        {{/eq}}
+        <p><b>Link:</b> {{link}} </p>
+        {{setVar "myId" _id}}
+        {{#eq status "PENDIENTE"}}
+        <!-- CHANGE STATUS REQUEST -->
+        <form class="mb-2" action="/notes/status/{{@root.myId}}?_method=PUT" method="POST">
+          <input type="hidden" name="_method" value="PUT" />
+          <button type="submit" class="btn btn-warning btn-block btn-sm">empezar evento</button>
+        </form>
+        {{else}}
+        {{#eq status "EN CURSO"}}
+        <!-- CHANGE STATUS REQUEST -->
+        <form class="mb-2" action="/notes/status/{{@root.myId}}?_method=PUT" method="POST">
+          <input type="hidden" name="_method" value="PUT" />
+          <button type="submit" class="btn btn-dark btn-block btn-sm">terminar evento</button>
+        </form>
+        {{/eq}}
+        {{/eq}}
+        {{#eq status "EN CURSO"}}
+        <p><b>Marcar Asistencia:</b></p>
+        <div id="listExhibitors" class="list-group mb-3">
+          {{#each assistance}}
+          <button onclick="assistanceUser('{{this._id}}', event)" type="button" {{#this.status}}
+            class="list-group-item list-group-item-action btn-primary" {{else}}
+            class="list-group-item list-group-item-action" {{/this.status}}>{{this.user.name}}:
+            {{this.user.email}}</button>
+          {{/each}}
+        </div>
+        {{/eq}}
+        {{#eq status "TERMINADO"}}
+        <p><b>Asistieron:</b></p>
+        <ul class="list-group mb-3">
+          {{#each assistance}}
+          {{#this.status}}
+          <li class="list-group-item">{{this.user.name}}:
+            {{this.user.email}}</li>
+          {{/this.status}}
+          {{/each}}
+        </ul>
+        {{/eq}}
         <!-- DELETE REQUEST -->
         <form action="/notes/delete/{{_id}}?_method=DELETE" method="POST">
-          <input type="hidden" name="_method" value="DELETE">
-          <button type="submit" class="btn btn-danger btn-block btn-sm">Delete</button>
+          <input type="hidden" name="_method" value="DELETE" />
+          <button type="submit" class="btn btn-danger btn-block btn-sm">eliminar evento</button>
         </form>
       </div>
     </div>
@@ -33,4 +81,24 @@
     </div>
   </div>
   {{/each}}
+  <script>
+    const assistanceUser = async (id, e) => {
+      try {
+        await fetch(`http://localhost:4000/notes/assistance/${id}`, {
+          method: "PUT",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          }
+        })
+        if (e.path[0].classList.contains('btn-primary')) {
+          e.path[0].classList.remove('btn-primary')
+        } else {
+          e.path[0].classList.add('btn-primary')
+        }
+      } catch (err) {
+        console.log(err)
+      }
+    }
+  </script>
 </div>

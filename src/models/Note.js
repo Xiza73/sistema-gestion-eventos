@@ -7,6 +7,11 @@ const NoteSchema = new Schema(
       type: String,
       required: true,
     },
+    status: {
+      type: String,
+      required: true,
+      default: "PENDIENTE"
+    },
     description: {
       type: String,
       required: true,
@@ -27,7 +32,12 @@ const NoteSchema = new Schema(
     link: {
       type: String,
       required: true,
-    }
+    },
+    assistance: [{
+      type: ObjectId,
+      ref: "Assistance",
+      required: false,
+    }]
   },
   {
     timestamps: true,

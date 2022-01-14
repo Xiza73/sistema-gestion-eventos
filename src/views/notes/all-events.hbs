@@ -1,0 +1,65 @@
+<div class="row">
+  {{#each user}}
+    {{setVar "myEmail" this.email}}
+  {{/each}}
+  {{setVar "array" assistances}}
+  {{#each notes}}
+    <div class="col-md-3">
+      <div class="card">
+        <div class="card-body" style="position: relative;">
+          <h4
+            class="card-title d-flex justify-content-between align-items-center"
+          >
+            {{title}}
+          </h4>
+          <p><b>ESTADO:</b> {{ status }} </p>
+          <p><b>Descripción:</b> {{description}} </p>
+          <p><b>Fecha:</b> {{date}} </p>
+          <p><b>Hora:</b> {{schedule}} </p>
+          <p><b>Expositores:</b></p>
+          <ul class="list-group mb-3">
+            {{#each exhibitors}}
+              <li class="list-group-item">{{this.name}}: {{this.dni}}</li>
+            {{/each}}
+          </ul>
+          <p><b>Link:</b> {{link}} </p>
+          {{setVar "myId" _id}}
+            {{#eq this.assist true}}
+              <!-- ASSIST REQUEST -->
+              <form
+                action="/notes/edit-event/{{_id}}?_method=PUT"
+                method="POST"
+              >
+                <input type="hidden" name="_method" value="PUT" />
+                <button
+                  type="submit"
+                  class="btn btn-warning btn-block btn-sm"
+                >Asistir</button>
+              </form>
+            {{else}}
+              <form
+                style="position: relative;"
+                action="/notes/edit-event/{{@root.myId}}?_method=PUT"
+                method="POST"
+              >
+                <input type="hidden" name="_method" value="PUT" />
+                <!-- ASSIST REQUEST -->
+                <button
+                  type="submit"
+                  class="btn btn-danger btn-block btn-sm"
+                >Cancelar Asistencia</button>
+              </form>
+            {{/eq}}
+        </div>
+      </div>
+    </div>
+  {{else}}
+    <div class="card mx-auto">
+      <div class="card-body">
+        <h1>Hello {{user.name}}</h1>
+        <p clsss="lead">There are not Notes yet.</p>
+        <a href="/notes/add" class="btn btn-success btn-block">Create One!</a>
+      </div>
+    </div>
+  {{/each}}
+</div>
